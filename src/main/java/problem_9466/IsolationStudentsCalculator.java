@@ -1,7 +1,9 @@
 package problem_9466;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class IsolationStudentsCalculator {
 	
@@ -25,38 +27,35 @@ public class IsolationStudentsCalculator {
 			
 			if(s == null)
 				return;
-			
-			int currentStudentNum  = s.getSelectedStudentNum();
-			
-			if(isContainedInTeam(currentStudentNum) ){
+						
+			if(isContainedInTeam(s) ){
 				excludeStudentsOfTeam(
-						getStudentsOfTeam(currentStudentNum));
+						getStudentsOfTeam(s)
+				);
 				
 				teamsNum++;
 			}else {
-				students[s.getSelectedStudentNum()] = null;
+				excludeStudent(s);
 				isolatedStudentsNum++;
 				
 			}
 		}
 	}
 	
-	private void excludeStudentsOfTeam(List<Integer> studentsOfTeam) {
-		for(int i : studentsOfTeam)
-			students[i] = null;
+	private void excludeStudentsOfTeam(Set<Student> studentsOfTeam) {
+		for(Student s : studentsOfTeam)
+			excludeStudent(s);	
 	}
 	
-	private List<Integer> getStudentsOfTeam(final int studentNum){
-		int  currentSelectedStudentNum = getStudent(studentNum).getSelectedStudentNum();
+	private Set<Student> getStudentsOfTeam(final Student student){
+		Student currentSelectedStudent = nextStudent(student);
+				
+		Set<Student> visitedStudents = new HashSet<>();
 		
-		Student currentSelectedStudent = getStudent(currentSelectedStudentNum);
+		visitedStudents.add(student);
 		
-		List<Integer> visitedStudents = new ArrayList<Integer>();
-		
-		visitedStudents.add(studentNum);
-		
-		while(currentSelectedStudentNum == studentNum) {
-			visitedStudents.add(currentSelectedStudentNum);
+		while(currentSelectedStudent.equals(student)) {
+			visitedStudents.add(currentSelectedStudent);
 		}
 		
 		return visitedStudents;
@@ -66,21 +65,20 @@ public class IsolationStudentsCalculator {
 	
 	
 	
-	private boolean isContainedInTeam(final int studentNum) {
+	private boolean isContainedInTeam(final Student student) {
 		
-		int  currentSelectedStudentNum = getStudent(studentNum).getSelectedStudentNum();
+		Student targetStudent = nextStudent(student);
 		
-		Student currentSelectedStudent = getStudent(currentSelectedStudentNum);
+		Set<Student> visitedStudents = new HashSet<>();
 		
-		List<Integer> visitedStudents = new ArrayList<Integer>();
-		
-		while(currentSelectedStudent != null && 
-				!visitedStudents.contains(currentSelectedStudent.getSelectedStudentNum())) {
+		while(isEmpty(targetStudent) && 
+				!visitedStudents.contains(targetStudent)) {
 				
-			if (currentSelectedStudent.getSelectedStudentNum() == studentNum)
-					return true;
+			if (targetStudent.equals(student))	return true;
 			
-			visitedStudents.add(currentSelectedStudent.getSelectedStudentNum());
+			visitedStudents.add(targetStudent);
+			
+			targetStudent = nextStudent(student);
 		}
 		
 		return false;
@@ -89,6 +87,20 @@ public class IsolationStudentsCalculator {
 	
 	private Student getStudent(int index) {
 		return students[index];
+	}
+	
+	private boolean isEmpty(Student student) {
+		int studentNum = student.getStudentNum();
+		return this.students[studentNum] == null;
+	}
+	
+	private Student nextStudent(Student student) {
+		int nextStudentNum = student.getTargetStudentNum();
+		return students[nextStudentNum];
+	}
+	
+	private void excludeStudent(Student student) {
+		students[student.getStudentNum()] = null;
 	}
 
 }
