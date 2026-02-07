@@ -1,19 +1,19 @@
 package problem_9466;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
+import lombok.AllArgsConstructor;
+
+
+@AllArgsConstructor
 public class IsolationStudentsCalculator {
 	
 	private int isolatedStudentsNum = 0;
-	
-	private int teamsNum = 0;
-	
-	private Student[] students;
-	
-	public IsolationStudentsCalculator(Student[] students) {
+		
+	private Students students;
+		
+	public IsolationStudentsCalculator(Students students) {
 		this.students = students;
 	}
 	
@@ -23,84 +23,23 @@ public class IsolationStudentsCalculator {
 	}
 	
 	private void goRoundStudents() {
-		for(Student s : students) {
+		for(int i = 1; i <= students.size(); i++) {
+			if(students.isNullStudent(i)) continue;
 			
-			if(s == null)
-				return;
+			Student s = students.getStudentByNum(i);
+			
+			Optional<Set<Student>> team = TeamDetector.getTeamOfStudent(s, students);
 						
-			if(isContainedInTeam(s) ){
-				excludeStudentsOfTeam(
-						getStudentsOfTeam(s)
-				);
-				
-				teamsNum++;
-			}else {
-				excludeStudent(s);
-				isolatedStudentsNum++;
-				
-			}
-		}
-	}
-	
-	private void excludeStudentsOfTeam(Set<Student> studentsOfTeam) {
-		for(Student s : studentsOfTeam)
-			excludeStudent(s);	
-	}
-	
-	private Set<Student> getStudentsOfTeam(final Student student){
-		Student currentSelectedStudent = nextStudent(student);
-				
-		Set<Student> visitedStudents = new HashSet<>();
-		
-		visitedStudents.add(student);
-		
-		while(currentSelectedStudent.equals(student)) {
-			visitedStudents.add(currentSelectedStudent);
-		}
-		
-		return visitedStudents;
-	}
-	
-	
-	
-	
-	
-	private boolean isContainedInTeam(final Student student) {
-		
-		Student targetStudent = nextStudent(student);
-		
-		Set<Student> visitedStudents = new HashSet<>();
-		
-		while(isEmpty(targetStudent) && 
-				!visitedStudents.contains(targetStudent)) {
-				
-			if (targetStudent.equals(student))	return true;
+			team.ifPresentOrElse((t)->{
+				students.excludeTeam(t);
+			},
+				()->{
+					students.exclude(s);
+					isolatedStudentsNum++;});
 			
-			visitedStudents.add(targetStudent);
-			
-			targetStudent = nextStudent(student);
 		}
-		
-		return false;
-	}
-	
-	
-	private Student getStudent(int index) {
-		return students[index];
-	}
-	
-	private boolean isEmpty(Student student) {
-		int studentNum = student.getStudentNum();
-		return this.students[studentNum] == null;
-	}
-	
-	private Student nextStudent(Student student) {
-		int nextStudentNum = student.getTargetStudentNum();
-		return students[nextStudentNum];
-	}
-	
-	private void excludeStudent(Student student) {
-		students[student.getStudentNum()] = null;
 	}
 
 }
+	
+	
