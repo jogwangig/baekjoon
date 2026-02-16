@@ -36,6 +36,8 @@ public class Main {
 			
 			results.add(isc.run());
 			
+			IsolationStudentsCalculator.isolatedStudentsNum = 0;
+			
 			
 		}
 		
@@ -148,6 +150,7 @@ public class Main {
 				
 				if (targetStudent.equals(s)) {
 					visitedStudents.add(s);
+					students.excludeTeam(visitedStudents);
 					return Optional.of(visitedStudents);
 				}
 				
@@ -156,14 +159,19 @@ public class Main {
 				targetStudent = students.getTargetStudent(targetStudent);
 			}
 			
+			//시작 학생부터해서 cycle이 시작되는 학생까지 제거 리스트로???
 			if(visitedStudents.contains(targetStudent)) {
-				visitedStudents = new HashSet<>();
+				Student k = s;
+				Student temp;
 				do {
-					visitedStudents.add(targetStudent);
-					
-					targetStudent = students.getTargetStudent(targetStudent);
-				}while(!visitedStudents.contains(targetStudent));
+					visitedStudents.remove(k);
+					temp = students.getTargetStudent(k);
+					students.exclude(k);
+					IsolationStudentsCalculator.isolatedStudentsNum++;
+					k = temp;
+				}while(!k.equals(targetStudent));
 				
+				students.excludeTeam(visitedStudents);
 				return Optional.of(visitedStudents);
 			}
 			
@@ -175,7 +183,7 @@ public class Main {
 	
 	static class IsolationStudentsCalculator {
 		
-		private int isolatedStudentsNum = 0;
+		public static int isolatedStudentsNum = 0;
 			
 		private Students students;
 			
@@ -194,21 +202,22 @@ public class Main {
 				
 				Student s = students.getStudentByNum(i);
 				
-				Optional<Set<Student>> team = TeamDetector.getTeamOfStudent(s, students);
+//				Optional<Set<Student>> team =
+						TeamDetector.getTeamOfStudent(s, students);
 				
 				
-				team.ifPresentOrElse((t)->{
-					if(t.contains(s)) {
-						students.excludeTeam(t);
-					}else {
-						students.exclude(s);
-						isolatedStudentsNum++;
-						students.excludeTeam(t);
-					}	
-				},
-					()->{
-						students.exclude(s);
-						isolatedStudentsNum++;});
+//				team.ifPresentOrElse((t)->{
+//					if(t.contains(s)) {
+//						students.excludeTeam(t);
+//					}else {
+//						students.exclude(s);
+//						isolatedStudentsNum++;
+//						students.excludeTeam(t);
+//					}	
+//				},
+//					()->{
+//						students.exclude(s);
+//						isolatedStudentsNum++;});
 				
 			}
 		}
