@@ -28,6 +28,17 @@ public class TeamDetector {
 			targetStudent = students.getTargetStudent(targetStudent);
 		}
 		
+		if(visitedStudents.contains(targetStudent)) {
+			visitedStudents = new HashSet<>();
+			do {
+				visitedStudents.add(targetStudent);
+				
+				targetStudent = students.getTargetStudent(targetStudent);
+			}while(visitedStudents.contains(targetStudent));
+			
+			return Optional.of(visitedStudents);
+		}
+		
 		return Optional.empty();
 	}
 	
