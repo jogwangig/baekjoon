@@ -4,6 +4,9 @@ import java.util.Optional;
 import java.util.Set;
 
 import lombok.AllArgsConstructor;
+import problem_9466.Main.Student;
+import problem_9466.Main.Students;
+import problem_9466.Main.TeamDetector;
 
 
 @AllArgsConstructor
@@ -15,6 +18,7 @@ public class IsolationStudentsCalculator {
 		
 	public IsolationStudentsCalculator(Students students) {
 		this.students = students;
+		isolatedStudentsNum = students.size();
 	}
 	
 	public int run() {
@@ -28,14 +32,7 @@ public class IsolationStudentsCalculator {
 			
 			Student s = students.getStudentByNum(i);
 			
-			Optional<Set<Student>> team = TeamDetector.getTeamOfStudent(s, students);
-						
-			team.ifPresentOrElse((t)->{
-				students.excludeTeam(t);
-			},
-				()->{
-					students.exclude(s);
-					isolatedStudentsNum++;});
+			isolatedStudentsNum = isolatedStudentsNum - TeamDetector.getTeamOfStudent(s, students);
 			
 		}
 	}

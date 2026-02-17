@@ -1,26 +1,40 @@
 package problem_9466;
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import lombok.AllArgsConstructor;
+import problem_9466.Main.Student;
+import problem_9466.Main.Students;
 
 @AllArgsConstructor
 public class TeamDetector {
 	
-	public static Optional<Set<Student>> getTeamOfStudent(Student s, Students students) {
+	public static int getTeamOfStudent(Student s, Students students) {
 		if(s.isNullStudent()) throw new RuntimeException("학생은 무조건 존재해야 합니다");
+		
+		int count = 0;
 		
 		Student targetStudent = students.getTargetStudent(s);
 		
 		Set<Student> visitedStudents = new HashSet<>();
 		
-		while(!targetStudent.isNullStudent() && !visitedStudents.contains(targetStudent)) {
+		visitedStudents.add(s);
+		
+		while(!targetStudent.isNullStudent()) {
 			
-			if (targetStudent.equals(s)) {
-				visitedStudents.add(s);
-				return Optional.of(visitedStudents);
+			if (visitedStudents.contains(targetStudent)) {//cycle
+				
+				Student temp = students.getTargetStudent(targetStudent);
+				count++;
+				
+				while(!temp.equals(targetStudent)) {
+					count++;
+					temp = students.getTargetStudent(temp);
+				}
+				
+				students.excludeTeam(visitedStudents);
+				return count;
 			}
 			
 			visitedStudents.add(targetStudent);
@@ -28,18 +42,10 @@ public class TeamDetector {
 			targetStudent = students.getTargetStudent(targetStudent);
 		}
 		
-		if(visitedStudents.contains(targetStudent)) {
-			visitedStudents = new HashSet<>();
-			do {
-				visitedStudents.add(targetStudent);
-				
-				targetStudent = students.getTargetStudent(targetStudent);
-			}while(visitedStudents.contains(targetStudent));
-			
-			return Optional.of(visitedStudents);
-		}
+		students.excludeTeam(visitedStudents);
 		
-		return Optional.empty();
+		return count;
+		
 	}
 	
 }

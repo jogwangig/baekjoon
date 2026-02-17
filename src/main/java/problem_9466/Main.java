@@ -35,9 +35,7 @@ public class Main {
 					);
 			
 			results.add(isc.run());
-			
-			IsolationStudentsCalculator.isolatedStudentsNum = 0;
-			
+						
 			
 		}
 		
@@ -139,19 +137,31 @@ public class Main {
 	
 	static class TeamDetector {
 		
-		public static Optional<Set<Student>> getTeamOfStudent(Student s, Students students) {
+		public static int getTeamOfStudent(Student s, Students students) {
 			if(s.isNullStudent()) throw new RuntimeException("학생은 무조건 존재해야 합니다");
+			
+			int count = 0;
 			
 			Student targetStudent = students.getTargetStudent(s);
 			
 			Set<Student> visitedStudents = new HashSet<>();
 			
-			while(!targetStudent.isNullStudent() && !visitedStudents.contains(targetStudent)) {
+			visitedStudents.add(s);
+			
+			while(!targetStudent.isNullStudent()) {
 				
-				if (targetStudent.equals(s)) {
-					visitedStudents.add(s);
+				if (visitedStudents.contains(targetStudent)) {//cycle
+					
+					Student temp = students.getTargetStudent(targetStudent);
+					count++;
+					
+					while(!temp.equals(targetStudent)) {
+						count++;
+						temp = students.getTargetStudent(temp);
+					}
+					
 					students.excludeTeam(visitedStudents);
-					return Optional.of(visitedStudents);
+					return count;
 				}
 				
 				visitedStudents.add(targetStudent);
@@ -159,36 +169,23 @@ public class Main {
 				targetStudent = students.getTargetStudent(targetStudent);
 			}
 			
-			//시작 학생부터해서 cycle이 시작되는 학생까지 제거 리스트로???
-			if(visitedStudents.contains(targetStudent)) {
-				Student k = s;
-				Student temp;
-				do {
-					visitedStudents.remove(k);
-					temp = students.getTargetStudent(k);
-					students.exclude(k);
-					IsolationStudentsCalculator.isolatedStudentsNum++;
-					k = temp;
-				}while(!k.equals(targetStudent));
-				
-				students.excludeTeam(visitedStudents);
-				return Optional.of(visitedStudents);
-			}
+			students.excludeTeam(visitedStudents);
 			
+			return count;
 			
-			return Optional.empty();
 		}
 		
 	}
 	
 	static class IsolationStudentsCalculator {
 		
-		public static int isolatedStudentsNum = 0;
+		private int isolatedStudentsNum;
 			
 		private Students students;
 			
 		public IsolationStudentsCalculator(Students students) {
 			this.students = students;
+			isolatedStudentsNum = students.size();
 		}
 		
 		public int run() {
@@ -202,22 +199,7 @@ public class Main {
 				
 				Student s = students.getStudentByNum(i);
 				
-//				Optional<Set<Student>> team =
-						TeamDetector.getTeamOfStudent(s, students);
-				
-				
-//				team.ifPresentOrElse((t)->{
-//					if(t.contains(s)) {
-//						students.excludeTeam(t);
-//					}else {
-//						students.exclude(s);
-//						isolatedStudentsNum++;
-//						students.excludeTeam(t);
-//					}	
-//				},
-//					()->{
-//						students.exclude(s);
-//						isolatedStudentsNum++;});
+				isolatedStudentsNum = isolatedStudentsNum - TeamDetector.getTeamOfStudent(s, students);
 				
 			}
 		}
