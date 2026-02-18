@@ -1,11 +1,27 @@
 package problem_19238;
 
-public  class Point{
-	int x,y;
+public  class Point implements Comparable<Point> {
+	int r,c;
 	
-	public Point(int x, int y) {
-		this.x = x;
-		this.y = y;
+	public Point(int r, int c) {
+		this.r = r;
+		this.c = c;
+	}
+	
+	public int getR() {
+		return this.r;
+	}
+	
+	public int getC() {
+		return this.c;
+	}
+	
+	@Override
+	public int compareTo(Point p) {
+		if(this.r != p.r)
+			return this.r - p.r;
+		
+		return this.c - p.c;
 	}
 	
 	@Override
@@ -16,6 +32,11 @@ public  class Point{
 		
 		Point p = (Point)o;
 		
-		return (p.x == this.x) && (p.y == this.y);
+		return (p.r == this.r) && (p.c == this.c);
+	}
+	
+	@Override
+	public String toString() {
+		return "(" + r + "," + c + ")";
 	}
 }
